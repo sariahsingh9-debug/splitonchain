@@ -56,7 +56,7 @@ edit('app.py', [
         def safe(value):
             if isinstance(value,str):
                 v=value.lstrip()
-                if v and (v[0] in ('=','+','@','\t','\r','\n') or
+                if v and (v[0] in ('=','+','@') or
                           (v[0]=='-' and (len(v)==1 or not v[1].isdigit()))):
                     return "'"+value
             return value
