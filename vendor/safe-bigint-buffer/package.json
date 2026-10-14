@@ -1,1 +1,0 @@
-{"name":"@split/safe-bigint-buffer","version":"1.0.0","private":true,"main":"index.cjs","description":"Bounded BigInt and Buffer conversions using native JavaScript; replaces the unmaintained native bigint-buffer dependency."}
