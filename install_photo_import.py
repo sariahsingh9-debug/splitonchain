@@ -30,5 +30,12 @@ if 'href="/paper-invoices/photos"' not in s:
     s=s[:line_end+1]+insert+s[line_end+1:]
 if '/static/photo_import.css' not in s:
     s=s.replace('</head>','<link rel="stylesheet" href="/static/photo_import.css?v=4"><script defer src="/static/photo_import.js?v=4"></script></head>',1)
+# Hide manual paper invoice entry from navigation; retain the existing route and records.
+manual_link = 'Enter paper invoice</a>{% endif %}'
+lines=s.splitlines(keepends=True)
+old_nav=[line for line in lines if manual_link in line and 'href="/paper-invoices/new"' in line]
+if len(old_nav)!=1:
+    raise RuntimeError(f'Expected exactly one manual paper invoice menu item, found {len(old_nav)}')
+s=s.replace(old_nav[0],'')
 base.write_text(s,encoding='utf-8')
 print('Mills invoice photo OCR and private review registered.')
