@@ -1,0 +1,24 @@
+/* Mills Multiservices photo invoice review */
+.photo-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.photo-summary>div{border-radius:12px;border:1px solid #e3ebf3;background:#fff;padding:15px;display:flex;gap:10px;align-items:center;font-size:12px;color:#52677b}
+.photo-summary strong{font-size:19px;color:#158aa2}
+.photo-upload-body{padding:16px 24px 26px}.photo-file-zone{border:2px dashed #acc5d6;background:#f7fafc;border-radius:13px;padding:26px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.photo-file-zone input{max-width:100%}.photo-file-zone svg{width:28px;height:28px}.photo-file-zone small,.photo-selected,.photo-safe-note{font-size:11px;color:#6b8193}
+.photo-selected{margin:12px 0}.photo-privacy-note{border-top:1px solid #e3eaf2;margin-top:18px;padding-top:12px;font-size:12px;color:#596d80}
+.photo-privacy-note svg{width:18px;height:18px}.photo-review-header,.photo-review-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.photo-review-header{margin:24px 0}.photo-review-card{margin-bottom:18px;overflow:hidden}
+.photo-review-title{border-bottom:1px solid #e2ebf4;padding:18px 22px}.photo-review-title h3{overflow-wrap:anywhere}
+.photo-review-cols{display:grid;grid-template-columns:minmax(220px,38%) minmax(0,1fr);gap:25px;padding:22px}
+.photo-preview-col{padding-right:20px;border-right:1px solid #e2ebf3}.photo-preview-col img{width:100%;object-fit:contain;max-height:700px;background:#f7fafc;border:1px solid #dfeaf3;border-radius:10px}
+.photo-preview-col p,.photo-review-header p{font-size:12px;color:#708395}.photo-fields-form h4{margin:0 0 12px}
+.photo-fields-form h4 small,.photo-score{font-size:11px;color:#66859c}
+.photo-fields-form input,.photo-fields-form textarea,.photo-fields-form select{max-width:100%}
+.photo-line-label,.photo-line-fields{display:grid;grid-template-columns:minmax(100px,1fr) 74px 115px;gap:8px;margin-bottom:7px}
+.photo-line-label{font-size:11px;color:#698097}.photo-line-fields input{min-width:0}
+.photo-warnings{padding:12px;border:1px solid #eed4a4;border-radius:9px;background:#fff9eb;font-size:12px;color:#73551c}
+.photo-detected-total{padding:12px;margin:14px 0;background:#eff8fb;border:1px solid #d8edf3;border-radius:9px;color:#26566d}
+.photo-detected-total small{display:block;font-size:11px}
+.photo-check{display:flex;gap:8px;align-items:start;margin:12px 0;font-size:12px}.photo-check input{flex-shrink:0}
+.photo-empty{text-align:center;padding:50px 20px;color:#6e849a}.photo-finished{padding:20px}
+@media(max-width:960px){.photo-review-cols{grid-template-columns:1fr}.photo-preview-col{border-right:0;border-bottom:1px solid #e2ebf3;padding:0 0 18px}.photo-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){.photo-summary{gap:5px}.photo-summary>div{font-size:10px;padding:8px}.photo-review-cols,.photo-upload-body{padding:14px}.photo-line-label,.photo-line-fields{grid-template-columns:minmax(85px,1fr) 52px 90px;gap:5px}}
