@@ -36,17 +36,24 @@ if marker not in s:
     s+='''
 /* MILLS OFFICIAL LOGO v7 */
 .sidebar .brand {height:116px;padding:12px 15px 10px;gap:10px;align-items:center}
-.mills-brand-symbol-wrap {width:64px;height:64px;flex:0 0 64px;border-radius:14px;background:#e7f2f9;border:1px solid #d0e0ed;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.mills-brand-symbol {width:61px;height:61px;object-fit:contain;display:block}
+.mills-brand-symbol-wrap {width:64px;height:64px;flex:0 0 64px;border-radius:0;background:transparent;border:0;box-shadow:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.mills-brand-symbol {width:61px;height:61px;object-fit:contain;display:block;background:transparent;border:0;box-shadow:none}
 .sidebar .brand .mills-brand-name {font-size:20px;letter-spacing:-.5px;line-height:1.02}
 .sidebar .brand .mills-brand-name span {font-size:14px;line-height:1.22}
 .sidebar .brand small {letter-spacing:.75px;font-size:7.5px;margin-top:5px}
-.auth-brand-panel .brand.mills-auth-brand-wrap {height:auto!important;min-height:0!important;width:218px;max-width:100%;padding:12px;background:#e7f2f9;border-radius:22px;border:1px solid #cbdfe9;display:flex;align-items:center;justify-content:center}
-.auth-brand-panel .mills-auth-logo {display:block;width:190px;max-width:100%;height:190px;object-fit:contain}
+.auth-brand-panel .brand.mills-auth-brand-wrap {height:auto!important;min-height:0!important;width:218px;max-width:100%;padding:0;background:transparent;border-radius:0;border:0;box-shadow:none;display:flex;align-items:center;justify-content:center}
+.auth-brand-panel .mills-auth-logo {display:block;width:190px;max-width:100%;height:190px;object-fit:contain;background:transparent;border:0;box-shadow:none;filter:drop-shadow(0 0 1px rgba(255,255,255,.48))}
 .mills-document-logo {width:92px;max-height:92px;object-fit:contain;flex-shrink:0}
-@media(max-width:760px){.sidebar .brand{height:113px;padding:10px 13px;gap:8px}.mills-brand-symbol-wrap{height:58px;width:58px;flex-basis:58px}.mills-brand-symbol{height:55px;width:55px}.sidebar .brand .mills-brand-name{font-size:19px}.auth-brand-panel .brand.mills-auth-brand-wrap{width:170px;padding:9px}.auth-brand-panel .mills-auth-logo{height:151px;width:151px}.mills-document-logo{width:72px;max-height:72px}}
+@media(max-width:760px){.sidebar .brand{height:113px;padding:10px 13px;gap:8px}.mills-brand-symbol-wrap{height:58px;width:58px;flex-basis:58px}.mills-brand-symbol{height:55px;width:55px}.sidebar .brand .mills-brand-name{font-size:19px}.auth-brand-panel .brand.mills-auth-brand-wrap{width:170px;padding:0}.auth-brand-panel .mills-auth-logo{height:151px;width:151px}.mills-document-logo{width:72px;max-height:72px}}
 '''
     css.write_text(s,encoding='utf-8')
+
+# Force browsers to fetch the updated, background-free logo CSS on the live site.
+import re
+base=root/'templates/base.html'
+html=base.read_text(encoding='utf-8')
+html=re.sub(r'/static/app\\.css\\?v=[0-9.]+', '/static/app.css?v=1.8', html)
+base.write_text(html,encoding='utf-8')
 
 # Use the same transparent official logo for PDF invoice headers.
 pdf=root/'invoice_tools.py'
