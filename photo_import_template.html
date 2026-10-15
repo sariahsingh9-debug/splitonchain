@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Scan paper invoices{% endblock %}
+{% block breadcrumb %}Invoices / Photo import{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">HISTORICAL RECORDS / DOCUMENT CAPTURE</span><h1>Scan paper invoices</h1><p>Upload several photos at once. The system reads them and prepares editable invoice details for review.</p></div><div class="head-actions"><a class="btn ghost" href="/paper-invoices/new">Manual entry</a><a class="btn ghost" href="/invoices">All invoices</a></div></div>
+<div class="photo-summary"><div><strong>01</strong><span>Select paper invoice photos</span></div><div><strong>02</strong><span>Automatic text extraction</span></div><div><strong>03</strong><span>Review and correct every invoice</span></div><div><strong>04</strong><span>Save verified drafts</span></div></div>
+<div class="panel photo-upload-card"><div class="panel-header"><div><h2>Upload invoice photographs</h2><p>Printed receipts and invoices, photographed on a phone or scanned</p></div><span class="subtle-pill">Up to 12 at a time</span></div><div class="photo-upload-body">
+{% if ocr_ready %}
+<form action="/paper-invoices/photos" method="post" enctype="multipart/form-data" id="photo-import-form">
+<input type="hidden" name="csrf" value="{{csrf}}">
+<label class="photo-file-zone" for="invoice-photos"><svg><use href="#i-file"/></svg><b>Select photos or take photos on your phone</b><small>JPG, PNG or WebP • 12 photos maximum • 8 MB each</small><input id="invoice-photos" type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required></label>
+<div class="photo-selected" id="photo-selected" aria-live="polite">No photos selected</div>
+<button class="btn primary" id="photo-process" type="submit">Read selected invoice photos <svg><use href="#i-arrow"/></svg></button>
+</form>
+{% else %}<div class="alert error"><span>!</span>The photo-reading engine is not installed on this server. Please contact your administrator.</div>{% endif %}
+<div class="photo-privacy-note"><svg><use href="#i-shield"/></svg><p><strong>Privacy and accuracy.</strong> Your photos are processed on the Mills Multiservices server, not sent to third-party AI companies. Only a reduced-size private review image is kept temporarily while it awaits approval. Printed text is generally more reliable than handwriting. <strong>Nothing is recorded in the general ledger by uploading a photo.</strong></p></div>
+</div></div>
+<div class="photo-review-header"><div><span class="eyebrow">REVIEW QUEUE</span><h2>Extracted invoices</h2><p>Every amount, date and customer name must be checked against the original photo.</p></div><span class="subtle-pill">{{pending}} waiting for review</span></div>
+{% if request.query_params.get('notices') %}<div class="alert error"><span>!</span>Some photos were skipped because they were duplicates or could not be read. Only successfully processed photos were added. Try clearer images if any are missing.</div>{% endif %}
+{% for s in scans %}
+<section class="panel photo-review-card" id="scan-{{s.id}}"><div class="photo-review-title"><div><span class="eyebrow">PHOTO {{s.id}}</span><h3>{{s.filename}}</h3><span class="subtle-pill">{{'Draft saved' if s.status=='imported' else 'Needs review'}}</span></div><div>{% if s.status=='review' %}<span class="photo-score">Text clarity: {{s.data.confidence or 0}} / 100</span>{% else %}<a class="btn soft" href="/invoices/{{s.invoice_id}}">View saved draft →</a>{% endif %}</div></div>
+{% if s.status=='review' %}
+<div class="photo-review-cols"><div class="photo-preview-col"><h4>Original photograph</h4><img src="/paper-invoices/photos/{{s.id}}/preview" alt="Private preview of paper invoice: {{s.filename}}" loading="lazy"><p>Zoom in on the original document and verify the numbers and spelling.</p>
+<form method="post" action="/paper-invoices/photos/{{s.id}}/delete" onsubmit="return confirm('Remove this unapproved scan?');"><input type="hidden" name="csrf" value="{{csrf}}"><button type="submit" class="btn ghost">Remove photo</button></form></div>
+<form class="photo-fields-form" method="post" action="/paper-invoices/photos/{{s.id}}/draft"><input type="hidden" name="csrf" value="{{csrf}}"><input type="hidden" name="scanned_total" value="{{s.data.total or ''}}">
+<h4>Automatically filled details <small>Editable</small></h4>
+{% if s.data.warnings %}<div class="photo-warnings"><strong>Review these items:</strong><ul>{% for warning in s.data.warnings %}<li>{{warning}}</li>{% endfor %}</ul></div>{% endif %}
+<div class="form-grid"><label class="wide-input">Original invoice number <span class="req">*</span><input name="reference" maxlength="100" value="{{s.data.reference or ''}}" placeholder="Enter the number on the paper" required></label>
+<label>Original invoice date <span class="req">*</span><input type="date" name="issued_on" value="{{s.data.issued_on or ''}}" required></label><label>Original due date <span class="req">*</span><input type="date" name="due_on" value="{{s.data.due_on or ''}}" required></label>
+<label>Existing customer<select name="contact_id"><option value="">Choose if customer already exists</option>{% for c in contacts %}<option value="{{c.id}}" {% if c.name|lower==s.data.customer|default('')|lower %}selected{% endif %}>{{c.name}}</option>{% endfor %}</select></label>
+<label>Or new customer name<input name="new_contact_name" maxlength="200" value="{{s.data.customer or ''}}" placeholder="Name printed on invoice"></label>
+<label>Business division <span class="req">*</span><select name="division_id" required><option value="">Select division</option>{% for d in divisions %}<option value="{{d.id}}">{{d.name}}</option>{% endfor %}</select></label>
+<label>Currency<select name="currency">{% for cc in ['TTD','USD','EUR','GBP','CAD'] %}<option value="{{cc}}" {% if cc==s.data.currency %}selected{% endif %}>{{cc}}</option>{% endfor %}</select></label>
+<label>Exchange rate to TTD<input name="fx_rate" type="number" min="0.000001" step="any" value="1" required><small>Set the historical rate for foreign-currency invoices.</small></label>
+<label>VAT percentage<input name="tax_percent" type="number" value="0" min="0" max="100" step="0.01"></label>
+</div><h4>Detected services and amounts <small>Correct before saving</small></h4><div class="photo-line-label"><span>Service / description</span><span>Quantity</span><span>Unit price</span></div>
+{% for n in range(1,9) %}{% set line=(s.data.lines[n-1] if s.data.lines and s.data.lines|length>=n else {}) %}<div class="photo-line-fields"><input name="desc_{{n}}" aria-label="Service description {{n}}" maxlength="500" value="{{line.description or ''}}" placeholder="Service or shipping charge"><input name="qty_{{n}}" aria-label="Quantity {{n}}" type="number" min="0.001" step="0.001" value="{{line.qty or '1'}}"><input name="unit_{{n}}" aria-label="Unit price {{n}}" type="number" min="0.01" step="0.01" value="{{line.unit or ''}}" placeholder="0.00"></div>{% endfor %}
+<div class="photo-detected-total">Amount detected on paper: <strong>{{s.data.currency}} {{s.data.total or 'Not found'}}</strong><small>Check the sum of line items and VAT. If the source amount looks wrong, correct the lines and explicitly acknowledge the difference below.</small></div>
+<label>Invoice notes<textarea name="memo" maxlength="2000" rows="2" placeholder="Optional historical document notes"></textarea></label>
+<label class="photo-check"><input type="checkbox" name="override_amount" value="yes">The verified line total differs from the detected total; use my corrected amounts</label>
+<label class="photo-check"><input type="checkbox" name="verified" value="yes" required><strong>I checked the customer, dates, invoice number, division, currency, services and totals against the original paper.</strong></label>
+<button type="submit" class="btn primary">Save verified invoice as draft <svg><use href="#i-arrow"/></svg></button><p class="photo-safe-note">Saving creates an unissued draft only. No revenue, cash, VAT, or receivable is posted until an authorized user issues it later.</p>
+</form></div>
+{% else %}<div class="photo-finished"><svg><use href="#i-shield"/></svg>Imported as invoice draft. The temporary review image has been discarded.</div>{% endif %}
+</section>
+{% else %}<div class="panel photo-empty"><h3>No paper invoices uploaded yet</h3><p>Select one or more invoice photographs above and the extracted details will appear here for review.</p></div>{% endfor %}
+{% endblock %}
