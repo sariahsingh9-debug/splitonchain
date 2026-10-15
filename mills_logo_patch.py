@@ -52,7 +52,7 @@ if marker not in s:
 import re
 base=root/'templates/base.html'
 html=base.read_text(encoding='utf-8')
-html=re.sub(r'/static/app\\.css\\?v=[0-9.]+', '/static/app.css?v=1.8', html)
+html=re.sub(r'/static/app\.css\?v=[0-9.]+', '/static/app.css?v=1.8', html)
 base.write_text(html,encoding='utf-8')
 
 # Use the same transparent official logo for PDF invoice headers.
