@@ -13,6 +13,8 @@ COPY photo_import.css /srv/atlas/static/photo_import.css
 COPY photo_import.js /srv/atlas/static/photo_import.js
 COPY install_photo_import.py /srv/atlas/install_photo_import.py
 COPY mills_logo_patch.py /srv/atlas/mills_logo_patch.py
+COPY sidebar_ambient.css /srv/atlas/static/sidebar_ambient.css
+COPY install_sidebar_ambient.py /srv/atlas/install_sidebar_ambient.py
 COPY mills_logo.b64 /tmp/mills_logo.b64
 COPY mills_emblem.b64 /tmp/mills_emblem.b64
 RUN tar xzf /tmp/bundle.tar.gz -C /srv/atlas \
@@ -24,6 +26,7 @@ RUN tar xzf /tmp/bundle.tar.gz -C /srv/atlas \
     && base64 -d /tmp/mills_emblem.b64 > /srv/atlas/static/mills-emblem.png \
     && rm /tmp/mills_logo.b64 /tmp/mills_emblem.b64 \
     && python mills_logo_patch.py \
+    && python install_sidebar_ambient.py \
     && python -m compileall -q /srv/atlas/app.py /srv/atlas/photo_import.py /srv/atlas/invoice_tools.py /srv/atlas/operations_plus.py /srv/atlas/models.py \
     && pip install --no-cache-dir -r requirements.txt 'Pillow>=10.4,<13' \
     && chown -R atlas:atlas /srv/atlas
