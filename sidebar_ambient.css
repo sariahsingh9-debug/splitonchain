@@ -1,0 +1,77 @@
+/* Mills Multiservices | subtle living red-and-blue sidebar atmosphere. */
+#sidebar.sidebar {
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 3% 10%, rgba(145,35,68,.10), transparent 49%),
+    radial-gradient(ellipse at 96% 83%, rgba(28,89,180,.14), transparent 48%),
+    linear-gradient(166deg, #0b192e 0%, #0b1a30 51%, #0a182c 100%);
+}
+#sidebar.sidebar::before,
+#sidebar.sidebar::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  width: 385px;
+  height: 475px;
+  border-radius: 50%;
+  filter: blur(34px);
+  will-change: transform;
+}
+#sidebar.sidebar::before {
+  top: -125px;
+  left: -190px;
+  background: radial-gradient(ellipse at center,
+    rgba(233,42,74,.34) 0%, rgba(227,45,76,.20) 26%,
+    rgba(166,37,97,.10) 52%, transparent 73%);
+  animation: millsSidebarCrimson 13s ease-in-out infinite alternate;
+}
+#sidebar.sidebar::after {
+  right: -195px;
+  bottom: -115px;
+  background: radial-gradient(ellipse at center,
+    rgba(0,136,255,.33) 0%, rgba(31,97,222,.19) 32%,
+    rgba(80,57,171,.11) 53%, transparent 75%);
+  animation: millsSidebarAzure 16s ease-in-out infinite alternate;
+}
+#sidebar.sidebar > .brand,
+#sidebar.sidebar > .workspace,
+#sidebar.sidebar > .sidebar-scroll,
+#sidebar.sidebar > .sidebar-foot {
+  position: relative;
+  z-index: 1;
+}
+#sidebar.sidebar .workspace {
+  background: rgba(25,43,68,.76);
+  border-color: rgba(124,160,200,.23);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+#sidebar.sidebar .sidebar-foot {
+  background: rgba(9,22,40,.40);
+  border-top-color: rgba(143,172,206,.16);
+}
+#sidebar.sidebar .nav-item:hover { background: rgba(38,65,96,.73); }
+#sidebar.sidebar .nav-item.active {
+  background: rgba(53,82,120,.74);
+  box-shadow: inset 0 1px 0 rgba(176,216,250,.09),
+              0 0 0 1px rgba(111,163,210,.11);
+}
+@keyframes millsSidebarCrimson {
+  0%   { transform: translate3d(-5px,-4px,0) scale(.94); }
+  40%  { transform: translate3d(72px,105px,0) scale(1.18); }
+  75%  { transform: translate3d(98px,178px,0) scale(1.07); }
+  100% { transform: translate3d(44px,225px,0) scale(1.15); }
+}
+@keyframes millsSidebarAzure {
+  0%   { transform: translate3d(18px,15px,0) scale(.98); }
+  35%  { transform: translate3d(-80px,-110px,0) scale(1.13); }
+  70%  { transform: translate3d(-105px,-195px,0) scale(1.03); }
+  100% { transform: translate3d(-53px,-250px,0) scale(1.16); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #sidebar.sidebar::before, #sidebar.sidebar::after {
+    animation: none;
+    will-change: auto;
+  }
+}
