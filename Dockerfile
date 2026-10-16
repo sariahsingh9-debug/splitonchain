@@ -20,6 +20,9 @@ COPY install_login_cash_ambient.py /srv/atlas/install_login_cash_ambient.py
 COPY handover_invoice.py /srv/atlas/handover_invoice.py
 COPY auto_capture.py /srv/atlas/auto_capture.py
 COPY install_handover.py /srv/atlas/install_handover.py
+COPY simple_invoice_workflow.py /srv/atlas/simple_invoice_workflow.py
+COPY simple_invoice_workflow.css /srv/atlas/static/simple_invoice_workflow.css
+COPY install_simple_invoice_workflow.py /srv/atlas/install_simple_invoice_workflow.py
 COPY invoice_background_part_01.txt /tmp/invoice_background_part_01.txt
 COPY invoice_background_part_02.txt /tmp/invoice_background_part_02.txt
 COPY invoice_background_part_03.txt /tmp/invoice_background_part_03.txt
@@ -41,7 +44,8 @@ RUN tar xzf /tmp/bundle.tar.gz -C /srv/atlas \
     && python install_login_cash_ambient.py \
     && cat /tmp/invoice_background_part_01.txt /tmp/invoice_background_part_02.txt /tmp/invoice_background_part_03.txt /tmp/invoice_background_part_04.txt /tmp/invoice_background_part_05.txt /tmp/invoice_background_part_06.txt | base64 -d > /srv/atlas/static/mills-blank-invoice.jpg \
     && python install_handover.py \
-    && python -m compileall -q /srv/atlas/app.py /srv/atlas/photo_import.py /srv/atlas/invoice_tools.py /srv/atlas/operations_plus.py /srv/atlas/models.py \
+    && python install_simple_invoice_workflow.py \
+    && python -m compileall -q /srv/atlas/simple_invoice_workflow.py /srv/atlas/app.py /srv/atlas/photo_import.py /srv/atlas/invoice_tools.py /srv/atlas/operations_plus.py /srv/atlas/models.py \
     && pip install --no-cache-dir -r requirements.txt 'Pillow>=10.4,<13' \
     && chown -R atlas:atlas /srv/atlas
 USER atlas
