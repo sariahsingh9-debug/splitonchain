@@ -71,7 +71,7 @@ def ready(result):
     if result.get('confidence',0)<75:return False
     if len(result['reference'])>100 or not (2<=len(result['customer'])<=200):return False
     lines=result.get('lines') or []
-    if not lines or len(lines)>8:return False
+    if not lines or len(lines)>20:return False
     try:
         amount=Decimal(result['total']);rows=[]
         for item in lines:
@@ -94,14 +94,6 @@ def automatic_draft(db,request,scan,next_number,audit):
         scan.error='An invoice with this original number already exists.';return False
     company=db.query(Setting).first()
     if not company:return False
-    customer_name=str(data['customer']).strip()
-    matches=db.query(Contact).filter(Contact.kind=='customer',func.lower(Contact.name)==customer_name.lower()).all()
-    if len(matches)>1:return False
-    customer=matches[0] if matches else Contact(kind='customer',name=customer_name)
-    if not matches:
-        customer.address=str(data.get('customer_address',''))[:1000]
-        customer.phone=str(data.get('customer_phone',''))[:80]
-        db.add(customer);db.flush()
     issue=date.fromisoformat(data['issued_on']);due=date.fromisoformat(data.get('due_on') or data['issued_on'])
     if due<issue:return False
     currency=data.get('currency','TTD')
@@ -115,12 +107,20 @@ def automatic_draft(db,request,scan,next_number,audit):
         entries.append((line['description'][:500],qty,price,amount))
     subtotal=sum(x[3] for x in entries)
     if abs(subtotal-int((Decimal(str(data['total']))*100).quantize(Decimal('1'))))>1:return False
+    customer_name=str(data['customer']).strip()
+    matches=db.query(Contact).filter(Contact.kind=='customer',func.lower(Contact.name)==customer_name.lower()).all()
+    if len(matches)>1:return False
+    customer=matches[0] if matches else Contact(kind='customer',name=customer_name)
+    if not matches:
+        customer.address=str(data.get('customer_address',''))[:1000]
+        customer.phone=str(data.get('customer_phone',''))[:80]
+        db.add(customer);db.flush()
     obj=Invoice(number=next_number(db,'invoice',company.invoice_prefix),contact_id=customer.id,
         division_id=division.id,issued_on=issue,due_on=due,currency='TTD',fx_rate='1',
         subtotal_cents=subtotal,tax_bps=0,tax_cents=0,total_cents=subtotal,status='draft',
-        memo='Automatically transcribed from original invoice photo. Verify before issuing.',
+        memo='\n'.join(v for v in [data.get('description'),data.get('reference_note')] if v),
         created_by=request.state.user.id,
-        bill_to_name=customer.name,bill_to_email=customer.email,bill_to_address=customer.address,
+        bill_to_name=customer.name,bill_to_email=customer.email,bill_to_address=data.get('customer_address') or customer.address,
         issuer_name=company.company_name,issuer_email=company.business_email,issuer_address=company.address,
         issuer_registration=company.registration_number,issuer_vat_number=company.vat_number)
     db.add(obj);db.flush()
@@ -129,9 +129,10 @@ def automatic_draft(db,request,scan,next_number,audit):
                            unit_price_cents=price,amount_cents=amount))
     design=active_design(db);design['issuer_phone']=company.business_phone or ''
     design['labels']=list(FIELDS)
+    design['bill_to_phone']=data.get('customer_phone') or customer.phone
     shipment=data.get('shipment') or {}
     db.add(InvoiceDocument(invoice_id=obj.id,original_reference=ref,source='paper',
         design_snapshot=json.dumps(design),extra_values=json.dumps([shipment.get(k,'') for k in FIELDS])))
-    scan.invoice_id=obj.id;scan.status='imported';scan.preview=None
+    scan.invoice_id=obj.id;scan.status='imported'
     audit(db,request,'auto drafted paper invoice','invoice',obj.id,'Original '+ref+' / scan '+str(scan.id))
     return True
